@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat-app</title>
+</head>
+
+<body>
+    <h1>Welcome to Chat-app</h1>
+
+    <h2>Đang online</h2>
+    <ul id="user-connected"></ul>
+
+    <ul id="messages"></ul>
+
+    <form id="chat-form">
+        <input type="text" id="chat-message" placeholder="Nhập tin nhắn">
+        <button type="submit">Gửi</button>
+    </form>
+</body>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    const name = prompt('Tên bạn là gì?');
+    socket.emit('user-connected', name);
+
+    const chatForm = document.querySelector('#chat-form');
+    const chatMessage = document.querySelector('#chat-message');
+    const messages = document.querySelector('#messages');
+    const userList = document.querySelector('#user-connected');
+
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = chatMessage.value;
+        const time = new Date().toLocaleTimeString(); // lấy thời gian hiện tại
+        socket.emit('on-chat', { name, message, time }); // gửi tin nhắn đến server
+        chatMessage.value = '';
+    })
+
+    // lắng nghe sự kiện 'user-chat' từ server và hiển thị tin nhắn trên giao diện
+    socket.on('user-chat', (message) => {
+        const chatItem = document.createElement('li');
+        chatItem.textContent = `[${message.time}] ${message.name}: ${message.message}`;
+        messages.appendChild(chatItem);
+    });
+
+    socket.on('update-user-list', (users) => {
+        userList.innerHTML = '';
+        users.forEach(user => {
+            const li = document.createElement('li');
+            li.textContent = user;
+            userList.appendChild(li);
+        });
+    })
+
+    socket.on('chat-history', (history) => {
+        history.forEach(message => {
+            const chatItem = document.createElement('li');
+            chatItem.textContent = `[${message.time}] ${message.name}: ${message.message}`;
+            messages.appendChild(chatItem);
+        });
+    })
+</script>
+
+</html>
