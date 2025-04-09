@@ -36,7 +36,7 @@
     chatForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const message = chatMessage.value;
-        const time = new Date().toLocaleTimeString(); // lấy thời gian hiện tại
+        const time = new Date().toLocaleTimeString();
         socket.emit('on-chat', { name, message, time }); // gửi tin nhắn đến server
         chatMessage.value = '';
     })
@@ -48,7 +48,7 @@
         messages.appendChild(chatItem);
     });
 
-    socket.on('update-user-list', (users) => {
+    socket.on('update-user-list', (users) => { // cập nhật danh sách người dùng đang online
         userList.innerHTML = '';
         users.forEach(user => {
             const li = document.createElement('li');
@@ -57,7 +57,7 @@
         });
     })
 
-    socket.on('chat-history', (history) => {
+    socket.on('chat-history', (history) => { // hiển thị lịch sử chat khi người dùng mới kết nối
         history.forEach(message => {
             const chatItem = document.createElement('li');
             chatItem.textContent = `[${message.time}] ${message.name}: ${message.message}`;
